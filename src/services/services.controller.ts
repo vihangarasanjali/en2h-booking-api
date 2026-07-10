@@ -8,6 +8,7 @@ import {
   Param,
   Patch,
   Post,
+  Query,
   UseGuards,
 } from '@nestjs/common';
 import {
@@ -24,6 +25,7 @@ import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import { ServicesService } from './services.service';
 import { CreateServiceDto } from './dto/create-service.dto';
 import { UpdateServiceDto } from './dto/update-service.dto';
+import { PaginationDto } from '../common/dto/pagination.dto';
 
 @ApiTags('Services')
 @Controller('services')
@@ -79,8 +81,8 @@ export class ServicesController {
       ],
     },
   })
-  findAll() {
-    return this.servicesService.findAllActive();
+  findAll(@Query() dto: PaginationDto) {
+    return this.servicesService.findAllActive(dto);
   }
 
   // ─── GET /api/services/:id ────────────────────────────────────────────────

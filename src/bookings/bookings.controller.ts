@@ -8,6 +8,7 @@ import {
   Param,
   Patch,
   Post,
+  Query,
   UseGuards,
 } from '@nestjs/common';
 import {
@@ -24,6 +25,7 @@ import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import { BookingsService } from './bookings.service';
 import { CreateBookingDto } from './dto/create-booking.dto';
 import { UpdateBookingStatusDto } from './dto/update-booking-status.dto';
+import { PaginationDto } from '../common/dto/pagination.dto';
 
 @ApiTags('Bookings')
 @Controller('bookings')
@@ -51,8 +53,8 @@ export class BookingsController {
   @ApiOperation({ summary: 'Get all bookings (authenticated)' })
   @ApiOkResponse({ description: 'Returns an array of all bookings.' })
   @ApiUnauthorizedResponse({ description: 'Missing or invalid access token' })
-  findAll() {
-    return this.bookingsService.findAll();
+  findAll(@Query() dto: PaginationDto) {
+    return this.bookingsService.findAll(dto);
   }
 
   // ─── GET /api/bookings/:id ─────────────────────────────────────────────────

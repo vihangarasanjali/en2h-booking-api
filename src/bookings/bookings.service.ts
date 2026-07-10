@@ -6,6 +6,7 @@ import {
 import { PrismaService } from '../prisma/prisma.service';
 import { CreateBookingDto } from './dto/create-booking.dto';
 import { UpdateBookingStatusDto } from './dto/update-booking-status.dto';
+import { PaginationDto } from '../common/dto/pagination.dto';
 import { BookingStatus } from '@prisma/client';
 
 @Injectable()
@@ -54,16 +55,34 @@ export class BookingsService {
 
   // ─── Read all ────────────────────────────────────────────────────────────────
 
-  async findAll() {
-    return this.prisma.booking.findMany({
-      orderBy: [
-        { bookingDate: 'desc' },
-        { bookingTime: 'desc' },
-      ],
-      include: {
-        service: true,
+  async findAll(dto: PaginationDto) {
+    const { page = 1, limit = 10 } = dto;
+    const skip = (page - 1) * limit;
+
+    const [data, total] = await this.prisma.$transaction([
+      this.prisma.booking.findMany({
+        orderBy: [
+          { bookingDate: 'desc' },
+          { bookingTime: 'desc' },
+        ],
+        include: {
+          service: true,
+        },
+        skip,
+        take: limit,
+      }),
+      this.prisma.booking.count(),
+    ]);
+
+    return {
+      data,
+      meta: {
+        page,
+        limit,
+        total,
+        totalPages: Math.ceil(total / limit),
       },
-    });
+    };
   }
 
   // ─── Read one ────────────────────────────────────────────────────────────────
