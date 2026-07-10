@@ -10,55 +10,81 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
-enum Role {
-  USER
-  ADMIN
-}
+// ---------------------------------------------------------------------------
+// Enums
+// ---------------------------------------------------------------------------
 
+/// Lifecycle states a booking can be in.
 enum BookingStatus {
-  PENDING
-  CONFIRMED
-  CANCELLED
+  PENDING    // Awaiting confirmation
+  CONFIRMED  // Accepted by the business
+  CANCELLED  // Cancelled by customer or business
+  COMPLETED  // Service has been delivered
+  NO_SHOW    // Customer did not attend
 }
 
+// ---------------------------------------------------------------------------
+// Models
+// ---------------------------------------------------------------------------
+
+/// Platform user (admin / staff). Customers are captured inline on Booking.
 model User {
-  id        String    @id @default(uuid())
-  email     String    @unique
+  id        String   @id @default(uuid())
+  email     String   @unique
   password  String
   name      String
-  role      Role      @default(USER)
-  createdAt DateTime  @default(now())
-  updatedAt DateTime  @updatedAt
-  bookings  Booking[]
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 
+  @@index([email])         // fast login look-up
   @@map("users")
 }
 
+/// A bookable service offered by the business.
 model Service {
   id          String    @id @default(uuid())
-  name        String
+  title       String
   description String?
-  price       Float
   duration    Int       // duration in minutes
+  price       Decimal   @db.Decimal(10, 2) // exact monetary value; avoids Float rounding
   isActive    Boolean   @default(true)
   createdAt   DateTime  @default(now())
   updatedAt   DateTime  @updatedAt
-  bookings    Booking[]
 
+  bookings Booking[]
+
+  @@index([isActive])      // quickly fetch only active services
   @@map("services")
 }
 
+/// A customer's reservation for a specific service.
 model Booking {
-  id        String        @id @default(uuid())
-  userId    String
-  user      User          @relation(fields: [userId], references: [id], onDelete: Cascade)
-  serviceId String
-  service   Service       @relation(fields: [serviceId], references: [id], onDelete: Cascade)
-  startTime DateTime
-  endTime   DateTime
-  status    BookingStatus @default(PENDING)
-  createdAt DateTime      @default(now())
-  updatedAt DateTime      @updatedAt
+  id            String        @id @default(uuid())
 
+  // ── Customer info (captured at booking time; no auth required) ──
+  customerName  String
+  customerEmail String
+  customerPhone String
+
+  // ── Scheduling ──
+  bookingDate   DateTime      @db.Date      // date portion only  (e.g. 2026-08-15)
+  bookingTime   DateTime      @db.Time      // time portion only  (e.g. 14:00:00)
+
+  // ── Status & extras ──
+  status        BookingStatus @default(PENDING)
+  notes         String?
+
+  // ── Relation: many Bookings → one Service ──
+  serviceId     String
+  service       Service       @relation(fields: [serviceId], references: [id], onDelete: Restrict)
+
+  createdAt     DateTime      @default(now())
+  updatedAt     DateTime      @updatedAt
+
+  @@index([serviceId])          // join / filter bookings by service
+  @@index([bookingDate])        // calendar / date-range queries
+  @@index([status])             // filter by booking lifecycle state
+  @@index([customerEmail])      // look up all bookings for a customer
+  @@index([serviceId, bookingDate]) // composite: bookings for a service on a date
   @@map("bookings")
 }
