@@ -20,7 +20,6 @@ enum BookingStatus {
   CONFIRMED  // Accepted by the business
   CANCELLED  // Cancelled by customer or business
   COMPLETED  // Service has been delivered
-  NO_SHOW    // Customer did not attend
 }
 
 // ---------------------------------------------------------------------------
