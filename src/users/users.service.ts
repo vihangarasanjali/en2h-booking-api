@@ -34,4 +34,26 @@ export class UsersService {
     }
     return this.prisma.user.create({ data });
   }
+
+  /**
+   * Store a bcrypt-hashed refresh token for the given user.
+   * Called on login and token rotation.
+   */
+  async updateRefreshToken(userId: string, hashedToken: string): Promise<void> {
+    await this.prisma.user.update({
+      where: { id: userId },
+      data: { refreshToken: hashedToken },
+    });
+  }
+
+  /**
+   * Clear the stored refresh token (set to null).
+   * Called on logout — any future refresh attempt will be rejected.
+   */
+  async clearRefreshToken(userId: string): Promise<void> {
+    await this.prisma.user.update({
+      where: { id: userId },
+      data: { refreshToken: null },
+    });
+  }
 }

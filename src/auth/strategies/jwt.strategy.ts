@@ -33,8 +33,8 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
       throw new UnauthorizedException('Token is no longer valid');
     }
 
-    // Destructure out the password — never expose it
-    const { password: _password, ...safeUser } = user;
+    // Destructure out sensitive fields — never expose them on req.user
+    const { password: _password, refreshToken: _rt, ...safeUser } = user;
     return safeUser;
   }
 }
