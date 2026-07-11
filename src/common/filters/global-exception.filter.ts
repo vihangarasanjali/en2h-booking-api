@@ -40,9 +40,9 @@ export class GlobalExceptionFilter implements ExceptionFilter {
     else if (exception instanceof Prisma.PrismaClientKnownRequestError) {
       switch (exception.code) {
         case 'P2002':
-          // Unique constraint violation
+          // Unique constraint violation — most likely a duplicate booking slot (race condition)
           statusCode = HttpStatus.CONFLICT;
-          message = 'A record with the provided value already exists';
+          message = 'This service is already booked for the selected date and time.';
           break;
 
         case 'P2025':

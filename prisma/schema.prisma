@@ -85,5 +85,7 @@ model Booking {
   @@index([status])             // filter by booking lifecycle state
   @@index([customerEmail])      // look up all bookings for a customer
   @@index([serviceId, bookingDate]) // composite: bookings for a service on a date
+  // Prevent double-booking: a slot (service + date + time) can only be active once
+  @@unique([serviceId, bookingDate, bookingTime], name: "unique_service_slot")
   @@map("bookings")
 }

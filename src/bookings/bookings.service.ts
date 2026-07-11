@@ -1,5 +1,6 @@
 import {
   BadRequestException,
+  ConflictException,
   Injectable,
   NotFoundException,
 } from '@nestjs/common';
@@ -37,6 +38,23 @@ export class BookingsService {
     // Parse time string to a Date object (for Prisma TIME field)
     const timeStr = dto.bookingTime.length === 5 ? `${dto.bookingTime}:00` : dto.bookingTime;
     const bookingTime = new Date(`1970-01-01T${timeStr}Z`);
+
+    // 3. Duplicate slot check — any booking (including CANCELLED) blocks the slot.
+    //    Cancelled bookings are retained as historical records and continue to
+    //    reserve their original slot. This matches the DB unique constraint behaviour.
+    const existingBooking = await this.prisma.booking.findFirst({
+      where: {
+        serviceId: dto.serviceId,
+        bookingDate,
+        bookingTime,
+      },
+    });
+
+    if (existingBooking) {
+      throw new ConflictException(
+        'This service is already booked for the selected date and time.',
+      );
+    }
 
     return this.prisma.booking.create({
       data: {
