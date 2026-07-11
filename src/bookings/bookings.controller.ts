@@ -20,12 +20,16 @@ import {
   ApiBadRequestResponse,
   ApiNotFoundResponse,
   ApiUnauthorizedResponse,
+  ApiQuery,
 } from '@nestjs/swagger';
+import { BookingStatus } from '@prisma/client';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import { BookingsService } from './bookings.service';
 import { CreateBookingDto } from './dto/create-booking.dto';
 import { UpdateBookingStatusDto } from './dto/update-booking-status.dto';
 import { PaginationDto } from '../common/dto/pagination.dto';
+
+import { BookingQueryDto } from './dto/booking-query.dto';
 
 @ApiTags('Bookings')
 @Controller('bookings')
@@ -53,7 +57,11 @@ export class BookingsController {
   @ApiOperation({ summary: 'Get all bookings (authenticated)' })
   @ApiOkResponse({ description: 'Returns an array of all bookings.' })
   @ApiUnauthorizedResponse({ description: 'Missing or invalid access token' })
-  findAll(@Query() dto: PaginationDto) {
+  @ApiQuery({ name: 'page', required: false, type: Number, description: 'Page number (starts from 1)' })
+  @ApiQuery({ name: 'limit', required: false, type: Number, description: 'Number of items per page (maximum 100)' })
+  @ApiQuery({ name: 'search', required: false, type: String, description: 'Search by customer name, email, or phone' })
+  @ApiQuery({ name: 'status', required: false, enum: BookingStatus, description: 'Filter by booking status' })
+  findAll(@Query() dto: BookingQueryDto) {
     return this.bookingsService.findAll(dto);
   }
 

@@ -20,6 +20,7 @@ import {
   ApiOperation,
   ApiTags,
   ApiUnauthorizedResponse,
+  ApiQuery,
 } from '@nestjs/swagger';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import { ServicesService } from './services.service';
@@ -81,6 +82,8 @@ export class ServicesController {
       ],
     },
   })
+  @ApiQuery({ name: 'page', required: false, type: Number, description: 'Page number (starts from 1)' })
+  @ApiQuery({ name: 'limit', required: false, type: Number, description: 'Number of items per page (maximum 100)' })
   findAll(@Query() dto: PaginationDto) {
     return this.servicesService.findAllActive(dto);
   }

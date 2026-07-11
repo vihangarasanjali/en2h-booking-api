@@ -6,7 +6,7 @@ import {
 import { PrismaService } from '../prisma/prisma.service';
 import { CreateBookingDto } from './dto/create-booking.dto';
 import { UpdateBookingStatusDto } from './dto/update-booking-status.dto';
-import { PaginationDto } from '../common/dto/pagination.dto';
+import { BookingQueryDto } from './dto/booking-query.dto';
 import { BookingStatus } from '@prisma/client';
 
 @Injectable()
@@ -55,12 +55,22 @@ export class BookingsService {
 
   // ─── Read all ────────────────────────────────────────────────────────────────
 
-  async findAll(dto: PaginationDto) {
-    const { page = 1, limit = 10 } = dto;
+  async findAll(dto: BookingQueryDto) {
+    const { page = 1, limit = 10, search } = dto;
     const skip = (page - 1) * limit;
+
+    const where: any = {};
+    if (search) {
+      where.OR = [
+        { customerName: { contains: search, mode: 'insensitive' } },
+        { customerEmail: { contains: search, mode: 'insensitive' } },
+        { customerPhone: { contains: search, mode: 'insensitive' } },
+      ];
+    }
 
     const [data, total] = await this.prisma.$transaction([
       this.prisma.booking.findMany({
+        where,
         orderBy: [
           { bookingDate: 'desc' },
           { bookingTime: 'desc' },
@@ -71,7 +81,7 @@ export class BookingsService {
         skip,
         take: limit,
       }),
-      this.prisma.booking.count(),
+      this.prisma.booking.count({ where }),
     ]);
 
     return {
