@@ -273,7 +273,7 @@ Tests: 22 passed
 - Service management requires authentication.
 - A service cannot have multiple bookings for the same date and time slot.
 - Cancelled bookings cannot be marked as completed.
-- Refresh tokens are stored securely using hashing.
+- The system assumes each service has a fixed duration represented in minutes.
 
 ---
 
