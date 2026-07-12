@@ -1,0 +1,38 @@
+services:
+  postgres:
+    image: postgres:16
+    container_name: booking-db
+
+    restart: always
+
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: booking_db
+
+    ports:
+      - "5432:5432"
+
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+
+  api:
+    build: .
+
+    container_name: booking-api
+
+    depends_on:
+      - postgres
+
+    ports:
+      - "3000:3000"
+
+    environment:
+      DATABASE_URL: postgresql://postgres:postgres@postgres:5432/booking_db
+      JWT_SECRET: "p9vK8mQ3xL7wR2nD5fH9sA6zT1cY4uE8iO0bN7gM3qP6rS9vX2aW5kL8jF4"
+      REFRESH_TOKEN_SECRET: "Z7mQ2xP9vL5rT8nK3aD6sF1wH4jC0yE9uB6iO8pR5tV2nX7qM3kL9zA4"
+      ACCESS_TOKEN_EXPIRATION: 15m
+      REFRESH_TOKEN_EXPIRATION: 7d
+
+volumes:
+  postgres_data:
