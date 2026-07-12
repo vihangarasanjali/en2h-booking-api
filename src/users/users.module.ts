@@ -3,6 +3,6 @@ import { UsersService } from './users.service';
 
 @Module({
   providers: [UsersService],
-  exports: [UsersService], // exported so AuthModule can inject it
+  exports: [UsersService], 
 })
 export class UsersModule {}

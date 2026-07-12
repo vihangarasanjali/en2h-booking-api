@@ -14,10 +14,7 @@ import { BookingStatus } from '@prisma/client';
 export class BookingsService {
   constructor(private readonly prisma: PrismaService) {}
 
-  // ─── Create ──────────────────────────────────────────────────────────────────
-
   async create(dto: CreateBookingDto) {
-    // 1. Validate service exists
     const service = await this.prisma.service.findUnique({
       where: { id: dto.serviceId },
     });
@@ -26,7 +23,6 @@ export class BookingsService {
       throw new NotFoundException(`Service with ID "${dto.serviceId}" not found`);
     }
 
-    // 2. Validate booking date is not in the past
     const bookingDate = new Date(`${dto.bookingDate}T00:00:00Z`);
     const today = new Date();
     today.setUTCHours(0, 0, 0, 0);
@@ -35,7 +31,6 @@ export class BookingsService {
       throw new BadRequestException('Booking date cannot be in the past');
     }
 
-    // Parse time string to a Date object (for Prisma TIME field)
     const timeStr = dto.bookingTime.length === 5 ? `${dto.bookingTime}:00` : dto.bookingTime;
     const bookingTime = new Date(`1970-01-01T${timeStr}Z`);
 
@@ -65,13 +60,10 @@ export class BookingsService {
         bookingTime,
         serviceId: dto.serviceId,
         notes: dto.notes,
-        // Default status PENDING is handled by schema default, but we can be explicit
         status: BookingStatus.PENDING,
       },
     });
   }
-
-  // ─── Read all ────────────────────────────────────────────────────────────────
 
   async findAll(dto: BookingQueryDto) {
     const { page = 1, limit = 10, search, status } = dto;
@@ -116,7 +108,6 @@ export class BookingsService {
     };
   }
 
-  // ─── Read one ────────────────────────────────────────────────────────────────
 
   async findOne(id: string) {
     const booking = await this.prisma.booking.findUnique({
@@ -133,12 +124,10 @@ export class BookingsService {
     return booking;
   }
 
-  // ─── Update Status ───────────────────────────────────────────────────────────
-
   async updateStatus(id: string, dto: UpdateBookingStatusDto) {
     const booking = await this.findOne(id);
 
-    // Protect historical records: CANCELLED bookings cannot be modified
+    // Prevent modifying cancelled bookings to preserve booking history.
     if (booking.status === BookingStatus.CANCELLED) {
       throw new BadRequestException('Cannot change the status of a CANCELLED booking');
     }
@@ -155,7 +144,6 @@ export class BookingsService {
   }
 
   async remove(id: string) {
-    // Ensure the record exists before attempting to cancel
     await this.findOne(id);
 
     await this.prisma.booking.update({

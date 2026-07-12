@@ -8,13 +8,9 @@ import { GlobalExceptionFilter } from './common/filters/global-exception.filter'
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
 
-  // Set global API prefix
   app.setGlobalPrefix('api');
-
-  // Enable CORS
   app.enableCors();
 
-  // Global validation pipe
   app.useGlobalPipes(
     new ValidationPipe({
       whitelist: true,
@@ -23,10 +19,9 @@ async function bootstrap() {
     }),
   );
 
-  // Global exception filter — must be registered after ValidationPipe
   app.useGlobalFilters(new GlobalExceptionFilter());
 
-  // Configure Swagger documentation
+
   const config = new DocumentBuilder()
     .setTitle('Booking Platform API')
     .setDescription('The API documentation for the Booking Platform application')
@@ -36,7 +31,6 @@ async function bootstrap() {
   const document = SwaggerModule.createDocument(app, config);
   SwaggerModule.setup('api/docs', app, document);
 
-  // Retrieve Port from ConfigService or fallback to 3000
   const configService = app.get(ConfigService);
   const port = configService.get<number>('PORT') ?? 3000;
 

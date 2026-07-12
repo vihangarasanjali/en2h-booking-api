@@ -33,7 +33,7 @@ import { PaginationDto } from '../common/dto/pagination.dto';
 export class ServicesController {
   constructor(private readonly servicesService: ServicesService) {}
 
-  // ─── POST /api/services ───────────────────────────────────────────────────
+  // POST /api/services 
 
   @Post()
   @UseGuards(JwtAuthGuard)
@@ -60,7 +60,7 @@ export class ServicesController {
     return this.servicesService.create(dto);
   }
 
-  // ─── GET /api/services ────────────────────────────────────────────────────
+  //GET /api/services
 
   @Get()
   @HttpCode(HttpStatus.OK)
@@ -88,7 +88,7 @@ export class ServicesController {
     return this.servicesService.findAllActive(dto);
   }
 
-  // ─── GET /api/services/:id ────────────────────────────────────────────────
+  // GET /api/services/:id 
 
   @Get(':id')
   @HttpCode(HttpStatus.OK)
@@ -113,7 +113,7 @@ export class ServicesController {
     return this.servicesService.findOne(id);
   }
 
-  // ─── PATCH /api/services/:id ──────────────────────────────────────────────
+  // PATCH /api/services/:id 
 
   @Patch(':id')
   @UseGuards(JwtAuthGuard)
@@ -141,7 +141,7 @@ export class ServicesController {
     return this.servicesService.update(id, dto);
   }
 
-  // ─── DELETE /api/services/:id ─────────────────────────────────────────────
+  // DELETE /api/services/:id
 
   @Delete(':id')
   @UseGuards(JwtAuthGuard)

@@ -28,7 +28,7 @@ import { JwtAuthGuard } from './guards/jwt-auth.guard';
 export class AuthController {
   constructor(private readonly authService: AuthService) {}
 
-  // ─── POST /api/auth/register ──────────────────────────────────────────────────
+  //  POST /api/auth/register 
 
   @Post('register')
   @HttpCode(HttpStatus.CREATED)
@@ -53,7 +53,7 @@ export class AuthController {
     return this.authService.register(dto);
   }
 
-  // ─── POST /api/auth/login ─────────────────────────────────────────────────────
+  //  POST /api/auth/login 
 
   @Post('login')
   @HttpCode(HttpStatus.OK)
@@ -72,7 +72,7 @@ export class AuthController {
     return this.authService.login(dto);
   }
 
-  // ─── POST /api/auth/refresh ───────────────────────────────────────────────────
+  // POST /api/auth/refresh 
 
   @Post('refresh')
   @HttpCode(HttpStatus.OK)
@@ -91,7 +91,7 @@ export class AuthController {
     return this.authService.refresh(dto);
   }
 
-  // ─── POST /api/auth/logout ────────────────────────────────────────────────────
+  //POST /api/auth/logout
 
   @Post('logout')
   @UseGuards(JwtAuthGuard)
@@ -107,7 +107,7 @@ export class AuthController {
     return this.authService.logout(req.user.id);
   }
 
-  // ─── GET /api/auth/me ─────────────────────────────────────────────────────────
+  //  GET /api/auth/me
 
   @Get('me')
   @UseGuards(JwtAuthGuard)
@@ -127,7 +127,6 @@ export class AuthController {
   })
   @ApiUnauthorizedResponse({ description: 'Missing or invalid access token' })
   getMe(@Request() req: any) {
-    // req.user is populated by JwtStrategy.validate() — password already excluded
     return req.user;
   }
 }

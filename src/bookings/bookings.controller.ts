@@ -36,7 +36,7 @@ import { BookingQueryDto } from './dto/booking-query.dto';
 export class BookingsController {
   constructor(private readonly bookingsService: BookingsService) {}
 
-  // ─── POST /api/bookings ────────────────────────────────────────────────────
+  // POST /api/bookings 
 
   @Post()
   @HttpCode(HttpStatus.CREATED)
@@ -48,7 +48,7 @@ export class BookingsController {
     return this.bookingsService.create(dto);
   }
 
-  // ─── GET /api/bookings ─────────────────────────────────────────────────────
+  // GET /api/bookings
 
   @Get()
   @UseGuards(JwtAuthGuard)
@@ -65,7 +65,7 @@ export class BookingsController {
     return this.bookingsService.findAll(dto);
   }
 
-  // ─── GET /api/bookings/:id ─────────────────────────────────────────────────
+  // GET /api/bookings/:id
 
   @Get(':id')
   @UseGuards(JwtAuthGuard)
@@ -79,7 +79,7 @@ export class BookingsController {
     return this.bookingsService.findOne(id);
   }
 
-  // ─── PATCH /api/bookings/:id/status ────────────────────────────────────────
+  //PATCH /api/bookings/:id/status 
 
   @Patch(':id/status')
   @UseGuards(JwtAuthGuard)
@@ -97,7 +97,7 @@ export class BookingsController {
     return this.bookingsService.updateStatus(id, dto);
   }
 
-  // ─── DELETE /api/bookings/:id ──────────────────────────────────────────────
+  //DELETE /api/bookings/:id
 
   @Delete(':id')
   @UseGuards(JwtAuthGuard)

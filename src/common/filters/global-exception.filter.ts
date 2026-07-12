@@ -21,12 +21,10 @@ export class GlobalExceptionFilter implements ExceptionFilter {
     let statusCode = HttpStatus.INTERNAL_SERVER_ERROR;
     let message: string | string[] = 'Internal server error';
 
-    // ── 1. NestJS HttpExceptions (NotFoundException, BadRequestException, etc.) ──
     if (exception instanceof HttpException) {
       statusCode = exception.getStatus();
       const body = exception.getResponse();
 
-      // ValidationPipe returns { message: string[] } for validation errors
       if (typeof body === 'object' && body !== null && 'message' in body) {
         message = (body as any).message;
       } else if (typeof body === 'string') {
@@ -36,17 +34,15 @@ export class GlobalExceptionFilter implements ExceptionFilter {
       }
     }
 
-    // ── 2. Prisma known request errors ────────────────────────────────────────
     else if (exception instanceof Prisma.PrismaClientKnownRequestError) {
       switch (exception.code) {
         case 'P2002':
-          // Unique constraint violation — most likely a duplicate booking slot (race condition)
+          // Handle duplicate records caused by database unique constraints.
           statusCode = HttpStatus.CONFLICT;
           message = 'This service is already booked for the selected date and time.';
           break;
 
         case 'P2025':
-          // Record not found
           statusCode = HttpStatus.NOT_FOUND;
           message = 'The requested record was not found';
           break;
@@ -56,13 +52,10 @@ export class GlobalExceptionFilter implements ExceptionFilter {
           message = 'Database request error';
           break;
       }
-      // Log with code for debugging but don't expose details to client
       this.logger.error(
         `Prisma error [${exception.code}]: ${exception.message}`,
       );
     }
-
-    // ── 3. Catch-all for unexpected errors ────────────────────────────────────
     else {
       this.logger.error('Unhandled exception', exception);
     }

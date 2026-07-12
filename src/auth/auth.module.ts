@@ -11,21 +11,17 @@ import { JwtAuthGuard } from './guards/jwt-auth.guard';
 
 @Module({
   imports: [
-    // UsersModule provides UsersService for credential lookups
     UsersModule,
 
-    // ConfigModule must be imported so AuthService can inject ConfigService
     ConfigModule,
 
-    // Register Passport with the default strategy name 'jwt'
     PassportModule.register({ defaultStrategy: 'jwt' }),
 
-    // Configure JwtModule asynchronously so it can read env vars via ConfigService
+    // Configure JWT using values from environment variables
     JwtModule.registerAsync({
       imports: [ConfigModule],
       inject: [ConfigService],
       useFactory: (configService: ConfigService) => ({
-        // Default secret used by JwtStrategy for access token verification
         secret: configService.getOrThrow<string>('JWT_SECRET'),
         signOptions: {
           expiresIn: configService.getOrThrow<string>('ACCESS_TOKEN_EXPIRATION') as StringValue,
@@ -36,11 +32,11 @@ import { JwtAuthGuard } from './guards/jwt-auth.guard';
   controllers: [AuthController],
   providers: [
     AuthService,
-    JwtStrategy, // Passport registers this as the 'jwt' strategy automatically
+    JwtStrategy, 
     JwtAuthGuard,
   ],
   exports: [
-    JwtAuthGuard, // Export so other modules can protect their routes
+    JwtAuthGuard,
     JwtStrategy,
     PassportModule,
   ],

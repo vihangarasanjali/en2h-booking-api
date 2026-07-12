@@ -12,19 +12,13 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
     private readonly usersService: UsersService,
   ) {
     super({
-      // Extract the Bearer token from the Authorization header
       jwtFromRequest: ExtractJwt.fromAuthHeaderAsBearerToken(),
-      // Reject expired tokens at the strategy level
       ignoreExpiration: false,
-      // Read the secret from environment — never hardcode it
       secretOrKey: configService.getOrThrow<string>('JWT_SECRET'),
     });
   }
-
-  /**
-   * Called by Passport after the token signature and expiry are verified.
-   * The returned value is attached to `request.user` for downstream handlers.
-   * We intentionally exclude the password hash.
+   /**
+   * Validates the JWT payload and attaches the user to request.user.
    */
   async validate(payload: JwtPayload) {
     const user = await this.usersService.findById(payload.sub);
@@ -33,7 +27,7 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
       throw new UnauthorizedException('Token is no longer valid');
     }
 
-    // Destructure out sensitive fields — never expose them on req.user
+    // Remove sensitive fields before attaching user data to the request.
     const { password: _password, refreshToken: _rt, ...safeUser } = user;
     return safeUser;
   }

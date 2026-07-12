@@ -6,26 +6,17 @@ import { Prisma, User } from '@prisma/client';
 export class UsersService {
   constructor(private readonly prisma: PrismaService) {}
 
-  /**
-   * Find a single user by their email address.
-   * Returns the full record including password hash (callers must strip it).
-   */
   async findByEmail(email: string): Promise<User | null> {
     return this.prisma.user.findUnique({ where: { email } });
   }
 
-  /**
-   * Find a single user by their UUID.
-   * Returns the full record including password hash (callers must strip it).
-   */
   async findById(id: string): Promise<User | null> {
     return this.prisma.user.findUnique({ where: { id } });
   }
 
   /**
    * Create a new user.
-   * Throws ConflictException when the email is already registered.
-   * NOTE: `data.password` must already be hashed before calling this method.
+   * Password must already be hashed before saving.
    */
   async create(data: Prisma.UserCreateInput): Promise<User> {
     const existing = await this.findByEmail(data.email);
@@ -36,8 +27,7 @@ export class UsersService {
   }
 
   /**
-   * Store a bcrypt-hashed refresh token for the given user.
-   * Called on login and token rotation.
+   * Stores hashed refresh token for token rotation.
    */
   async updateRefreshToken(userId: string, hashedToken: string): Promise<void> {
     await this.prisma.user.update({
@@ -47,8 +37,7 @@ export class UsersService {
   }
 
   /**
-   * Clear the stored refresh token (set to null).
-   * Called on logout — any future refresh attempt will be rejected.
+   * Removes stored refresh token during logout.
    */
   async clearRefreshToken(userId: string): Promise<void> {
     await this.prisma.user.update({

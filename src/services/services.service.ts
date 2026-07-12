@@ -8,8 +8,6 @@ import { PaginationDto } from '../common/dto/pagination.dto';
 export class ServicesService {
   constructor(private readonly prisma: PrismaService) {}
 
-  // ─── Create ──────────────────────────────────────────────────────────────────
-
   async create(dto: CreateServiceDto) {
     return this.prisma.service.create({
       data: {
@@ -24,12 +22,6 @@ export class ServicesService {
     });
   }
 
-  // ─── Read all active ─────────────────────────────────────────────────────────
-
-  /**
-   * Returns only active services.
-   * Public endpoint — no auth needed.
-   */
   async findAllActive(dto: PaginationDto) {
     const { page = 1, limit = 10 } = dto;
     const skip = (page - 1) * limit;
@@ -57,13 +49,6 @@ export class ServicesService {
     };
   }
 
-  // ─── Read one ────────────────────────────────────────────────────────────────
-
-  /**
-   * Returns a single service by ID regardless of isActive status.
-   * Public endpoint — no auth needed.
-   * Throws NotFoundException when the ID does not exist.
-   */
   async findOne(id: string) {
     const service = await this.prisma.service.findUnique({ where: { id } });
 
@@ -74,10 +59,7 @@ export class ServicesService {
     return service;
   }
 
-  // ─── Update ──────────────────────────────────────────────────────────────────
-
   async update(id: string, dto: UpdateServiceDto) {
-    // Ensure the record exists before attempting to update
     await this.findOne(id);
 
     return this.prisma.service.update({
@@ -92,15 +74,7 @@ export class ServicesService {
     });
   }
 
-  // ─── Delete ──────────────────────────────────────────────────────────────────
-
-  /**
-   * Hard-deletes the service.
-   * Prisma will enforce onDelete: Restrict on the bookings FK,
-   * so this will throw if the service has associated bookings.
-   */
   async remove(id: string) {
-    // Ensure the record exists before attempting to delete
     await this.findOne(id);
 
     await this.prisma.service.delete({ where: { id } });
